@@ -46,6 +46,6 @@ def repulsion_loss(x: Tensor) -> Tensor:
     
     #next objective
     repulsion = torch.mean(torch.exp(-pdist * 10.0)) 
-    total_loss = circle_error + 0.05 * repulsion
+    total_loss = circle_error + 0.2 * repulsion
     
     return total_loss

@@ -21,7 +21,7 @@ def load_checkerboard(batch_size: int = 200, device : str = 'cpu'):
     return points.float()
 
 
-def fm_training(steps: int = 5000, batch_size: int = 512, device: str = 'cpu'):
+def fm_training(steps: int = 15000, batch_size: int = 512, device: str = 'cpu'):
     "Trains the fm model to learn the checkerboard distribution"
     model = MLP().to(device=device)
     wrapped_model = WrappedModel(model)
@@ -33,7 +33,8 @@ def fm_training(steps: int = 5000, batch_size: int = 512, device: str = 'cpu'):
     for iter in range(steps):
         optimizer.zero_grad()
         x1 = load_checkerboard(batch_size, device=device)
-        x0 = torch.rand_like(x1)
+        #x0 = torch.rand_like(x1)    #uniform distribution
+        x0 = torch.randn_like(x1)   #gaussian distribution
 
         t = torch.rand(batch_size,1, device=device)
 
@@ -55,11 +56,12 @@ def fm_training(steps: int = 5000, batch_size: int = 512, device: str = 'cpu'):
     return wrapped_model
 
 
-def dflow(trained_model, loss_func, steps: int = 20, batch_size: int = 4096, device: str = 'cpu', optmz_steps: int = 600):
+def dflow(trained_model, loss_func, steps: int = 20, batch_size: int = 1000, device: str = 'cpu', optmz_steps: int = 300):
     "Optimizes the input image x0 for minimizing the cicle loss and ultimately producing circle as an output"
     wrapped_model = trained_model
     print("Training Flow Matching on Checkerboard with Dflow for Circle...")
-    x0 = torch.randn(batch_size, 2, device=device)
+    x0 = torch.randn(batch_size, 2, device=device) 
+    #x0 = torch.randn(batch_size, 2, device=device) * 0.01  #dense cloud
     #x0 = torch.rand(batch_size, 2, device=device)
     x0.requires_grad = True
     optimizer = torch.optim.Adam([x0], lr=0.1)
@@ -93,10 +95,4 @@ def dflow(trained_model, loss_func, steps: int = 20, batch_size: int = 4096, dev
 
     return history_x0, history_x1
 
-
-
-
-
-
-    
 
